@@ -1,5 +1,7 @@
 # IFQ584 — Object-Oriented Design and Development
 
+[![Build](https://github.com/bitcoinbrisbane/IFQ584-Object-Oriented-Design-and-Development/actions/workflows/build.yml/badge.svg)](https://github.com/bitcoinbrisbane/IFQ584-Object-Oriented-Design-and-Development/actions/workflows/build.yml)
+
 Coursework for QUT unit **IFQ584 (Object-Oriented Design and Development)**: a
 C# / .NET console implementation of **Numerical Tic Tac Toe**, delivered across
 two assignments.
@@ -96,6 +98,140 @@ public static IPlayer Create(PlayerKind kind, string name) => kind switch
     PlayerKind.Computer => new Computer(name),
     _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "Unknown player kind.")
 };
+```
+
+## Class diagram (Assignment 2)
+
+```mermaid
+classDiagram
+    class IGame {
+        <<interface>>
+        +string State
+        +Load(string data)
+        +Save()
+    }
+    class IPlayer {
+        <<interface>>
+        +string Name
+        +GetMove(Board board) Move
+    }
+    class ICommand {
+        <<interface>>
+        +Execute() bool
+        +Undo()
+    }
+
+    class Game {
+        +IPlayer PlayerOne
+        +IPlayer PlayerTwo
+        +Board Board
+        +IPlayer CurrentPlayer
+        +int NextNumber
+        -Stack~ICommand~ _undo
+        -Stack~ICommand~ _redo
+        +PlayMove(row, column) bool
+        +Undo() Move?
+        +Redo() Move?
+    }
+    class Board {
+        +int Size
+        +int TargetSum
+        +int NextNumber
+        +PlacePiece(row, column, Piece) bool
+        +UndoLastMove() Move?
+        +IsWinningMove(row, column, number) bool
+        +HasWinningLine() bool
+    }
+    class Piece {
+        +int Value
+        +char Mark
+    }
+    class Move {
+        <<record struct>>
+        +int Row
+        +int Column
+        +int Number
+    }
+    class MoveCommand {
+        -Board _board
+        -Action _swapTurn
+        +Execute() bool
+        +Undo()
+    }
+    class GameSettings {
+        <<singleton>>
+        +GameSettings Instance$
+        +int MinBoardSize
+        +int MaxBoardSize
+    }
+    class PlayerFactory {
+        <<factory>>
+        +Create(PlayerKind, name)$ IPlayer
+    }
+    class PlayerBase {
+        <<abstract>>
+        +string Name
+        +GetMove(Board board)* Move
+    }
+    class Player
+    class Computer
+
+    IGame <|.. Game
+    IPlayer <|.. Player
+    IPlayer <|.. Computer
+    ICommand <|.. MoveCommand
+    PlayerBase <|-- Player
+    PlayerBase <|-- Computer
+
+    Game o-- "2" IPlayer
+    Game *-- Board
+    Game *-- "many" ICommand : undo/redo stacks
+    Board *-- "n*n" Piece
+    Board o-- "many" Move
+    MoveCommand --> Board : mutates
+    PlayerFactory ..> IPlayer : creates
+    PlayerFactory ..> Player : new
+    PlayerFactory ..> Computer : new
+```
+
+## Sequence diagram (Assignment 2)
+
+A player's move, routed through the **Command** pattern so it can later be undone.
+`Program` asks the current player for a cell, `Game` wraps it in a `MoveCommand`,
+executes it, and pushes it onto the undo history.
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant Program
+    participant Game
+    participant IPlayer
+    participant MoveCommand
+    participant Board
+
+    Program->>Game: CurrentPlayer
+    Game-->>Program: player
+    Program->>IPlayer: GetMove(board)
+    IPlayer-->>Program: Move(row, column)
+
+    Program->>Game: PlayMove(row, column)
+    Game->>MoveCommand: new MoveCommand(board, swapTurn, row, column)
+    Game->>MoveCommand: Execute()
+    MoveCommand->>Board: PlacePiece(row, column, Piece)
+    alt cell free
+        Board-->>MoveCommand: true
+        MoveCommand->>Game: swapTurn()
+        MoveCommand-->>Game: true
+        Game->>Game: _undo.Push(command)
+        Game->>Game: _redo.Clear()
+        Game-->>Program: true
+        Program->>Board: HasWinningLine()
+        Board-->>Program: won? / draw?
+    else cell taken
+        Board-->>MoveCommand: false
+        MoveCommand-->>Game: false
+        Game-->>Program: false (re-prompt)
+    end
 ```
 
 ## Build and run
