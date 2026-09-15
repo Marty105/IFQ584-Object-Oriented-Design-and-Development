@@ -1,0 +1,12 @@
+# .NET build output
+bin/
+obj/
+
+# macOS
+.DS_Store
+
+# Zip archives
+*.zip
+
+# Claude local settings
+.claude/settings.local.json
