@@ -246,6 +246,25 @@ dotnet run --project Assignment2/TicTacToe
 dotnet run --project Assignment1/TicTacToe
 ```
 
+## Lines of code
+
+Hand-written C# source (excludes `bin/` and `obj/` build output):
+
+| Assignment | Lines |
+|------------|------:|
+| Assignment 1 | 757 |
+| Assignment 2 | 1342 |
+| **Total** | **2099** |
+
+Regenerate the counts with the bundled script:
+
+```bash
+./count-lines.sh
+```
+
+It searches the repo for `.cs` files (skipping build output) and prints a
+per-assignment breakdown and total.
+
 ## Repository layout
 
 ```
@@ -255,6 +274,7 @@ Assignment1/
 Assignment2/
   TicTacToe/            game + patterns (ICommand, MoveCommand, GameSettings, PlayerFactory…)
   Report.md, Design.md, Design.pdf
+count-lines.sh          counts C# source lines per assignment
 ```
 
 ---
