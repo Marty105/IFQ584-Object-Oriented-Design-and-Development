@@ -100,7 +100,7 @@ public static IPlayer Create(PlayerKind kind, string name) => kind switch
 
 ## Build and run
 
-Requires the .NET SDK.
+Requires the .NET 10 SDK.
 
 ```bash
 # Assignment 2 (latest)
