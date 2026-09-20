@@ -14,7 +14,7 @@ Game game = ChooseLoadGame() ? LoadGame() : NewGame();
 var board = game.Board;
 
 Console.WriteLine();
-Console.WriteLine("Numerical Tic Tac Toe");
+Console.WriteLine($"You chose {game.GameType}.");
 Console.WriteLine($"{game.PlayerOne} vs {game.PlayerTwo}");
 Console.WriteLine($"Board size: {board.Size}x{board.Size}, using the numbers 1 to {board.HighestNumber}");
 Console.WriteLine(
@@ -70,7 +70,6 @@ bool ChooseLoadGame()
 {
     while (true)
     {
-        Console.WriteLine("Numerical Tic Tac Toe");
         Console.WriteLine("  1) New game");
         Console.WriteLine("  2) Load a saved game");
         Console.WriteLine("  3) Help");
@@ -122,6 +121,7 @@ void ShowHelp()
 // or the computer.
 Game NewGame()
 {
+    string gameType = ChooseGameType();
     int boardSize = ChooseBoardSize();
     bool againstComputer = ChooseComputerOpponent();
 
@@ -135,7 +135,7 @@ Game NewGame()
         againstComputer ? PlayerKind.Computer : PlayerKind.Human,
         againstComputer ? settings.ComputerName : settings.PlayerTwoName);
 
-    return new Game(playerOne, playerTwo, boardSize);
+    return new Game(playerOne, playerTwo, boardSize, gameType);
 }
 
 // Load a saved game the user picks from the .json save files in the working
@@ -178,7 +178,7 @@ Game LoadGame()
     var loaded = new Game(
         PlayerFactory.Create(PlayerKind.Human, "Player 1"),
         PlayerFactory.Create(PlayerKind.Human, "Player 2"),
-        3);
+        3, "Placeholder Game Type");
 
     try
     {
@@ -247,6 +247,35 @@ TurnChoice AskTurnChoice()
         Console.WriteLine("Sorry, I didn't understand that.");
     }
 }
+
+// Ask the user for the game type ( Numerical Tic-Tac-Toe, Notakto or Gomoku)
+// input is a correct number that correspondes to a game type
+
+string ChooseGameType()
+{
+    while (true)
+    {
+        Console.WriteLine("Choose a game:");
+        Console.WriteLine("  1) Numerical Tic-Tac-Toe");
+        Console.WriteLine("  2) Notakto");
+        Console.WriteLine("  3) Gomoku");
+        Console.Write("Enter 1, 2 or 3: ");
+
+        switch (Console.ReadLine()?.Trim())
+        {
+            case "1":
+                return "Numerical Tic-Tac-Toe";
+            case "2":
+                return "Notakto";
+            case "3":
+                return "Gomoku";
+            default:
+                Console.WriteLine("Incorrect input. Please enter 1, 2 or 3.");
+                break;
+        }
+    }
+}
+
 
 // Ask the user for the board size (cells per side). Keeps asking until the
 // input is a whole number within the supported range.

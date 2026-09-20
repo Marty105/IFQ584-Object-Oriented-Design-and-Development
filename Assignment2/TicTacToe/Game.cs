@@ -16,6 +16,11 @@ public class Game : IGame
     public IPlayer PlayerTwo { get; private set; }
 
     /// <summary>
+    /// The game type.
+    /// </summary>
+    public string GameType { get; private set; }
+
+    /// <summary>
     /// The board the game is played on.
     /// </summary>
     public Board Board { get; private set; }
@@ -46,11 +51,12 @@ public class Game : IGame
     /// <param name="playerOne">The first player.</param>
     /// <param name="playerTwo">The second player.</param>
     /// <param name="boardSize">The number of cells along one side of the board.</param>
-    public Game(IPlayer playerOne, IPlayer playerTwo, int boardSize)
+    public Game(IPlayer playerOne, IPlayer playerTwo, int boardSize, string gameType)
     {
         PlayerOne = playerOne;
         PlayerTwo = playerTwo;
         Board = new Board(boardSize);
+        GameType = gameType;
     }
 
     /// <summary>The player whose turn it is right now.</summary>
@@ -87,6 +93,7 @@ public class Game : IGame
         PlayerTwo = PlayerFactory.Create(PlayerKind.Human, state.PlayerTwo);
         Board = RestoreBoard(state);
         _playerOnesTurn = state.PlayerOnesTurn;
+        GameType = state.GameType;
         // A loaded game starts a fresh command history: the moves that rebuilt the
         // board were replayed directly, not through commands, and there is nothing
         // meaningful to undo back past the saved position.
@@ -242,6 +249,7 @@ public class Game : IGame
         }
 
         return new GameState(
+            GameType,
             Board.Size,
             PlayerOne.Name,
             PlayerTwo.Name,
@@ -251,6 +259,7 @@ public class Game : IGame
 
     /// <summary>The serialisable shape of a whole game.</summary>
     private sealed record GameState(
+        string GameType,
         int BoardSize,
         string PlayerOne,
         string PlayerTwo,
