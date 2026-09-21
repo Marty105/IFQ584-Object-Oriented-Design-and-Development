@@ -181,6 +181,9 @@ public class Board
         }
     }
 
+   // **** Deleting rules from Board as these are only used in numerical TTT
+    
+    /*
     /// <summary>
     /// Every line that can win the game: each of the n rows, each of the n
     /// columns, and the two long diagonals.
@@ -270,6 +273,9 @@ public class Board
     /// ---+---+---
     ///  O |   | X
     /// </summary>
+    /// 
+
+    */
     public override string ToString()
     {
         // Every mark (X or O) is a single character, so cells are one wide.

@@ -121,7 +121,7 @@ void ShowHelp()
 // or the computer.
 Game NewGame()
 {
-    string gameType = ChooseGameType();
+    GameType gameType = ChooseGameType();
     int boardSize = ChooseBoardSize();
     bool againstComputer = ChooseComputerOpponent();
 
@@ -178,7 +178,7 @@ Game LoadGame()
     var loaded = new Game(
         PlayerFactory.Create(PlayerKind.Human, "Player 1"),
         PlayerFactory.Create(PlayerKind.Human, "Player 2"),
-        3, "Placeholder Game Type");
+        3, GameType.NumericalTicTacToe);
 
     try
     {
@@ -250,8 +250,9 @@ TurnChoice AskTurnChoice()
 
 // Ask the user for the game type ( Numerical Tic-Tac-Toe, Notakto or Gomoku)
 // input is a correct number that correspondes to a game type
+// Returns the chosen <see cref="GameType"/>
 
-string ChooseGameType()
+static GameType ChooseGameType()
 {
     while (true)
     {
@@ -264,11 +265,11 @@ string ChooseGameType()
         switch (Console.ReadLine()?.Trim())
         {
             case "1":
-                return "Numerical Tic-Tac-Toe";
+                return GameType.NumericalTicTacToe;
             case "2":
-                return "Notakto";
+                return GameType.Notakto;
             case "3":
-                return "Gomoku";
+                return GameType.Gomoku;
             default:
                 Console.WriteLine("Incorrect input. Please enter 1, 2 or 3.");
                 break;

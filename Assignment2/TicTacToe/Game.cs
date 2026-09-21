@@ -16,21 +16,10 @@ public class Game : IGame
     public IPlayer PlayerTwo { get; private set; }
 
     /// <summary>
-    /// The game type.
+    /// The game variant.
     /// </summary>
-    public string GameType { get; private set; }
+    public GameVariant Variant { get; private set; }
 
-    /// <summary>
-    /// The board the game is played on.
-    /// </summary>
-    public Board Board { get; private set; }
-
-    /// <summary>
-    /// Whose turn it is: true for player one, false for player two. Held as state
-    /// (and saved) rather than derived, so a loaded game resumes with the right
-    /// player and undo/redo simply flip it.
-    /// </summary>
-    private bool _playerOnesTurn = true;
 
     /// <summary>
     /// The commands that have been played, most recent on top (the Command
@@ -45,29 +34,33 @@ public class Game : IGame
     /// </summary>
     private readonly Stack<ICommand> _redo = new();
 
+    /// <Whicplayer's turn it is> //
+    private bool _playerOnesTurn = true;
+
     /// <summary>
     /// Creates a new game between two players on a board of the given size.
     /// </summary>
     /// <param name="playerOne">The first player.</param>
     /// <param name="playerTwo">The second player.</param>
-    /// <param name="boardSize">The number of cells along one side of the board.</param>
-    public Game(IPlayer playerOne, IPlayer playerTwo, int boardSize, string gameType)
+    /// <param name="variant">The type of game. </param>
+    /// 
+    public Game(IPlayer playerOne, IPlayer playerTwo, GameVariant variant)
     {
         PlayerOne = playerOne;
         PlayerTwo = playerTwo;
-        Board = new Board(boardSize);
-        GameType = gameType;
+        Variant = variant;
     }
 
     /// <summary>The player whose turn it is right now.</summary>
     public IPlayer CurrentPlayer => _playerOnesTurn ? PlayerOne : PlayerTwo;
+    public IPlayer OtherPlayer => _playerOnesTurn ? PlayerTwo : PlayerOne;
 
     /// <summary>
     /// The number the next move will place. Numbers are played in order and
     /// shared between the players, so it is simply one more than the number of
     /// moves made so far: the 1st move plays 1, the 2nd plays 2, and so on.
     /// </summary>
-    public int NextNumber => Board.Moves.Count + 1;
+    //public int NextNumber => Board.Moves.Count + 1;
 
     /// <summary>Hands the turn to the other player.</summary>
     private void SwapTurn() => _playerOnesTurn = !_playerOnesTurn;
@@ -87,13 +80,20 @@ public class Game : IGame
             throw new ArgumentException("The game state is not valid JSON.", nameof(data));
         }
 
+        GameVariant variant = GameFactory.CreateGame(state.GameType, state.BoardSize);
+
+        foreach (Placement placement in state.Moves)
+        {
+            variant.Play(placement);
+        }
+
         // The saved state does not record whether a side was human or computer,
         // so both are rebuilt as humans through the same factory the game uses.
         PlayerOne = PlayerFactory.Create(PlayerKind.Human, state.PlayerOne);
         PlayerTwo = PlayerFactory.Create(PlayerKind.Human, state.PlayerTwo);
-        Board = RestoreBoard(state);
-        _playerOnesTurn = state.PlayerOnesTurn;
-        GameType = state.GameType;
+        Variant = variant;
+        _playerOnesTurn = variant.MoveCount % 2 == 0;
+        //GameType = state.GameType;
         // A loaded game starts a fresh command history: the moves that rebuilt the
         // board were replayed directly, not through commands, and there is nothing
         // meaningful to undo back past the saved position.
@@ -106,7 +106,7 @@ public class Game : IGame
     /// through <see cref="Board.PlacePiece"/>, which also restores the move
     /// history in reading order.
     /// </summary>
-    private static Board RestoreBoard(GameState state)
+   /* private static Board RestoreBoard(GameState state)
     {
         var board = new Board(state.BoardSize);
 
@@ -126,7 +126,8 @@ public class Game : IGame
         }
 
         return board;
-    }
+    } 
+   */
 
     /// <inheritdoc />
     /// <remarks>
@@ -162,18 +163,18 @@ public class Game : IGame
     /// history. Returns false (without changing anything) if the cell was taken.
     /// A fresh move retires any commands that were waiting to be redone.
     /// </summary>
-    public bool PlayMove(int row, int column)
+    public MoveOutcome PlayMove(int row, int column, int boardIndex = 0)
     {
-        var command = new MoveCommand(Board, SwapTurn, row, column);
+        var command = new MoveCommand(Variant, SwapTurn, row, column, boardIndex);
 
         if (!command.Execute())
         {
-            return false;
+            return MoveOutcome.Illegal;
         }
 
         _undo.Push(command);
         _redo.Clear();
-        return true;
+        return command.Outcome;
     }
 
     /// <summary>True if there is a command that can be undone.</summary>
@@ -187,7 +188,7 @@ public class Game : IGame
     /// and handing the turn back) and moves it onto the redo history.
     /// Returns the undone move, or null if there was nothing to undo.
     /// </summary>
-    public Move? Undo()
+    public Placement? Undo()
     {
         if (_undo.Count == 0)
         {
@@ -198,7 +199,7 @@ public class Game : IGame
         command.Undo();
         _redo.Push(command);
 
-        return (command as MoveCommand)?.Move;
+        return (command as MoveCommand)?.Placement;
     }
 
     /// <summary>
@@ -206,7 +207,7 @@ public class Game : IGame
     /// onto the undo history.
     /// Returns the redone move, or null if there was nothing to redo.
     /// </summary>
-    public Move? Redo()
+    public Placement? Redo()
     {
         if (_redo.Count == 0)
         {
@@ -217,7 +218,7 @@ public class Game : IGame
         command.Execute();
         _undo.Push(command);
 
-        return (command as MoveCommand)?.Move;
+        return (command as MoveCommand)?.Placement;
     }
 
     /// <inheritdoc />
@@ -234,35 +235,23 @@ public class Game : IGame
     /// both players' names, whose turn it is, and the grid of numbers (null for
     /// empty cells).
     /// </summary>
-    private GameState Snapshot()
-    {
-        var cells = new int?[Board.Height][];
-
-        for (int row = 0; row < Board.Height; row++)
-        {
-            cells[row] = new int?[Board.Width];
-
-            for (int column = 0; column < Board.Width; column++)
-            {
-                cells[row][column] = Board.GetCell(row, column)?.Value;
-            }
-        }
-
-        return new GameState(
-            GameType,
-            Board.Size,
-            PlayerOne.Name,
-            PlayerTwo.Name,
-            _playerOnesTurn,
-            cells);
-    }
+    private GameState Snapshot() => new(
+        Variant.Type,
+        Variant.Boards[0].Size,
+        PlayerOne.Name,
+        PlayerTwo.Name,
+        Variant.History.ToArray());
 
     /// <summary>The serialisable shape of a whole game.</summary>
     private sealed record GameState(
-        string GameType,
+        GameType GameType,
         int BoardSize,
         string PlayerOne,
         string PlayerTwo,
-        bool PlayerOnesTurn,
-        int?[][] Cells);
+      Placement[] Moves);
+
 }
+    
+
+
+
