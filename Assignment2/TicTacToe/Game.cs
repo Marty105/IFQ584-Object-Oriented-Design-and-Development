@@ -55,12 +55,6 @@ public class Game : IGame
     public IPlayer CurrentPlayer => _playerOnesTurn ? PlayerOne : PlayerTwo;
     public IPlayer OtherPlayer => _playerOnesTurn ? PlayerTwo : PlayerOne;
 
-    /// <summary>
-    /// The number the next move will place. Numbers are played in order and
-    /// shared between the players, so it is simply one more than the number of
-    /// moves made so far: the 1st move plays 1, the 2nd plays 2, and so on.
-    /// </summary>
-    //public int NextNumber => Board.Moves.Count + 1;
 
     /// <summary>Hands the turn to the other player.</summary>
     private void SwapTurn() => _playerOnesTurn = !_playerOnesTurn;
@@ -106,28 +100,6 @@ public class Game : IGame
     /// through <see cref="Board.PlacePiece"/>, which also restores the move
     /// history in reading order.
     /// </summary>
-   /* private static Board RestoreBoard(GameState state)
-    {
-        var board = new Board(state.BoardSize);
-
-        for (int row = 0; row < state.Cells.Length; row++)
-        {
-            int?[] cellsInRow = state.Cells[row];
-
-            for (int column = 0; column < cellsInRow.Length; column++)
-            {
-                int? value = cellsInRow[column];
-
-                if (value is int number)
-                {
-                    board.PlacePiece(row, column, new Piece(number));
-                }
-            }
-        }
-
-        return board;
-    } 
-   */
 
     /// <inheritdoc />
     /// <remarks>
@@ -231,7 +203,7 @@ public class Game : IGame
     };
 
     /// <summary>
-    /// Builds a plain, serialisable snapshot of the whole game: the board size,
+    /// Builds a plain, serialisable snapshot of the whole game: the game variant, the board size and count,
     /// both players' names, whose turn it is, and the grid of numbers (null for
     /// empty cells).
     /// </summary>

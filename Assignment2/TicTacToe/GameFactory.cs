@@ -31,7 +31,7 @@ public static class GameFactory
             GameType.Notakto => new NotaktoGame(),
             GameType.Gomoku => new GomokuGame(),
             _ => throw new ArgumentOutOfRangeException(
-                nameof(gameType), gameType, "Unkown game type selecion")
+                nameof(gameType), gameType, "Unkown game type selecion, please try again.")
         };
     }
 }
