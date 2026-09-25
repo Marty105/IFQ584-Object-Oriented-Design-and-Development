@@ -1,9 +1,7 @@
-
-
 namespace TicTacToe;
 
 // Results from a move //
-public enum MoveOutcome { Illegal, Coninue, CurrentPlayerWins, CurrentPlayerLoses, Draw}
+public enum MoveOutcome { Illegal, Continue, CurrentPlayerWins, CurrentPlayerLoses, Draw }
 
 // Structure of the board game. // 
 public readonly record struct Placement(int Row, int Column, int BoardIndex = 0);
@@ -11,12 +9,12 @@ public readonly record struct Placement(int Row, int Column, int BoardIndex = 0)
 public abstract class GameVariant
 {
     private readonly Board[] _boards;
+
     private readonly List<Placement> _history = new();
-   
 
-   //protected GameVariant(params Board[] boards) {/* needs at least one */}
+    //protected GameVariant(params Board[] boards) {/* needs at least one */}
 
-   // public abstract GameType Type { get; }
+    // public abstract GameType Type { get; }
     //public IReadOnlyList<Board> Boards => _boards;
     public IReadOnlyList<Placement> History => _history;
     public int MoveCount => _history.Count;
@@ -25,12 +23,12 @@ public abstract class GameVariant
 
     //public MoveOutcome TakeTurn(Placement p) // Test //
     //public Placement? Undo()
-   // public MoveOutcome? Redo()
-   
+    // public MoveOutcome? Redo()
+
 
 
     // Move Template // 
-    public MoveOutcome Play (Placement placement)
+    public MoveOutcome Play(Placement placement)
     {
         if (!IsOnAnEmptyCell(p) || !IsLegal(p)) return MoveOutcome.Illegal;
         Apply(p);
@@ -49,7 +47,7 @@ public abstract class GameVariant
     public MoveOutcome Preview(Placement p)
     public bool IsWinningMove(Placement p)
 
-    private bool IsOnAnEmptyCell (Placement p) // valid Board position, cell is null //
+    private bool IsOnAnEmptyCell(Placement p) // valid Board position, cell is null //
 
     // Parts game variants supply //
     protected virtual bool IsLegal(Placement p) => true;
@@ -68,7 +66,7 @@ public sealed class NumericalTTTGame : GameVariant
 {
     public NumericalTTTGame(int size = 3) : base(new Board(size)) { }
     public override GameType Type => GameType.NumericalTicTacToe;
-    protected override void Apply (Placement p)
+    protected override void Apply(Placement p)
     protected override MoveOutcome Evaluate(Placement p)
     protected override Lines(board)
     protected override IsMatch(board, line)
