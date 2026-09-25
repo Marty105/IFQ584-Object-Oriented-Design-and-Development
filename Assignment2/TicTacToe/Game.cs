@@ -22,12 +22,6 @@ public abstract class Game
     public IPlayer PlayerOne { get; }
     public IPlayer PlayerTwo { get; }
 
-    /// <summary>The boards the game is played on. Most games have just one.</summary>
-    private readonly Board[] _boards;
-
-    /// <summary>Every move played so far, most recent on top.</summary>
-    private readonly Stack<Placement> _history = new();
-
     /// <summary>
     /// The commands that have been played, most recent on top (the Command
     /// pattern's history). Undoing pops from here; a fresh move pushes onto it.
@@ -62,7 +56,14 @@ public abstract class Game
     /// <summary>Which kind of game this is.</summary>
     public abstract GameType Type { get; }
 
+    /// <summary>The boards the game is played on. Most games have just one.</summary>
+    private readonly Board[] _boards;
+    
     public IReadOnlyList<Board> Boards => _boards;
+
+    /// <summary>Every move played so far, most recent on top.</summary>
+    private readonly Stack<Placement> _history = new();
+
 
     /// <summary>Every move played so far, oldest first.</summary>
     public IEnumerable<Placement> History => _history.Reverse();
@@ -74,7 +75,7 @@ public abstract class Game
     /// from how many moves have been played.
     /// </summary>
     public IPlayer CurrentPlayer => MoveCount % 2 == 0 ? PlayerOne : PlayerTwo;
-    
+
     public IPlayer OtherPlayer => MoveCount % 2 == 0 ? PlayerTwo : PlayerOne;
 
     // Move Template //
