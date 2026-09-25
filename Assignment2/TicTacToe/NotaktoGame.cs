@@ -4,7 +4,7 @@ namespace TicTacToe;
 /// Notakto: both players play X on three 3x3 boards. A board with three in a
 /// row is dead and can't be played on; whoever kills the last board loses.
 /// </summary>
-public sealed class NotaktoGame : Game
+public sealed class NotaktoGame : Game, IGame
 {
     public NotaktoGame(IPlayer playerOne, IPlayer playerTwo)
         : base(playerOne, playerTwo, new Board(3), new Board(3), new Board(3))

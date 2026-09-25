@@ -10,8 +10,11 @@ namespace TicTacToe;
 /// the steps (check the cell, apply the move, record it, evaluate the result) and
 /// each concrete game supplies its own rules through <see cref="IsLegal"/>,
 /// <see cref="Apply"/> and <see cref="Evaluate"/>.
+///
+/// This class does not itself declare <see cref="IGame"/>; each concrete game
+/// implements that interface, using the members provided here to satisfy it.
 /// </summary>
-public abstract class Game : IGame
+public abstract class Game
 {
     /// <summary>
     /// The two players in the game. Player one moves first.
@@ -265,7 +268,7 @@ public abstract class Game : IGame
         return game;
     }
 
-    /// <inheritdoc />
+    /// <summary>Persists the current game so it can be reloaded later.</summary>
     /// <remarks>
     /// Prompts at the console for a save name and writes the current
     /// <see cref="State"/> to "&lt;name&gt;.json" in the working directory.
@@ -293,7 +296,7 @@ public abstract class Game : IGame
     public static string SaveFilePath(string name) =>
         Path.Combine(Directory.GetCurrentDirectory(), name + ".json");
 
-    /// <inheritdoc />
+    /// <summary>The current game serialised as JSON.</summary>
     public string State => JsonSerializer.Serialize(Snapshot(), SerializerOptions);
 
     /// <summary>Options used when serialising the game state.</summary>

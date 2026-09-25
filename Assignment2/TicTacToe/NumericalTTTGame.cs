@@ -5,7 +5,7 @@ namespace TicTacToe;
 /// 1..n^2 and play them in order; whoever completes a line of n numbers adding
 /// up to the board's target sum wins, no matter who played the other numbers.
 /// </summary>
-public sealed class NumericalTTTGame : Game
+public sealed class NumericalTTTGame : Game, IGame
 {
     public NumericalTTTGame(IPlayer playerOne, IPlayer playerTwo, int size = 3)
         : base(playerOne, playerTwo, new Board(size))
