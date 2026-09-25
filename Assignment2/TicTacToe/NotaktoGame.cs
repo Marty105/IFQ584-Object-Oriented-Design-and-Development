@@ -18,17 +18,27 @@ public sealed class NotaktoGame : Game, IGame
         throw new NotImplementedException();
     }
 
-    public override bool IsLegal(Placement p)
+    private bool IsDead(Board b)
     {
         throw new NotImplementedException();
     }
 
-    public override void Apply(Placement p)
+    public bool IsLegal(Placement p)
     {
         throw new NotImplementedException();
     }
 
-    public override MoveOutcome Evaluate(Placement p)
+    public void Apply(Placement p)
+    {
+        throw new NotImplementedException();
+    }
+
+    public MoveOutcome Evaluate(Placement p)
+    {
+        throw new NotImplementedException();
+    }
+
+    private static bool IsMatch(Board board, (int Row, int Column)[] line)
     {
         throw new NotImplementedException();
     }

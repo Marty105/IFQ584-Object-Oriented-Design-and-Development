@@ -66,6 +66,7 @@ public abstract class Game
 
     /// <summary>Every move played so far, oldest first.</summary>
     public IEnumerable<Placement> History => _history.Reverse();
+
     public int MoveCount => _history.Count;
 
     /// <summary>
@@ -73,6 +74,7 @@ public abstract class Game
     /// from how many moves have been played.
     /// </summary>
     public IPlayer CurrentPlayer => MoveCount % 2 == 0 ? PlayerOne : PlayerTwo;
+    
     public IPlayer OtherPlayer => MoveCount % 2 == 0 ? PlayerTwo : PlayerOne;
 
     // Move Template //
@@ -84,14 +86,20 @@ public abstract class Game
     /// </summary>
     internal MoveOutcome Play(Placement placement)
     {
-        if (!IsOnAnEmptyCell(placement) || !IsLegal(placement))
+        // The rules live on IGame, which each concrete game implements. //
+        if (this is not IGame rules)
+        {
+            throw new InvalidOperationException($"{GetType().Name} must implement IGame.");
+        }
+
+        if (!IsOnAnEmptyCell(placement) || !rules.IsLegal(placement))
         {
             return MoveOutcome.Illegal;
         }
 
-        Apply(placement);
+        rules.Apply(placement);
         _history.Push(placement);
-        return Evaluate(placement);
+        return rules.Evaluate(placement);
     }
 
     /// <summary>
@@ -119,22 +127,6 @@ public abstract class Game
         Board board = _boards[p.BoardIndex];
         return board.IsInBounds(p.Row, p.Column) && board.GetCell(p.Row, p.Column) is null;
     }
-
-    // Parts game types supply (declared on IGame) //
-    
-
-    /// <summary>Any extra rule a game places on moves. Allows everything by default.</summary>
-    public virtual bool IsLegal(Placement p) => true;
-
-    /// <summary>Puts the move's piece on the board.</summary>
-    public abstract void Apply(Placement p);
-
-    /// <summary>
-    /// Decides what the move just applied means for the player who made it.
-    /// </summary>
-    public abstract MoveOutcome Evaluate(Placement p);
-
-    // Additional helpers //
 
     /// <summary>
     /// Every straight run of <paramref name="length"/> cells on the board: across
