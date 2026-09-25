@@ -14,13 +14,13 @@ public sealed class NumericalTTTGame : Game, IGame
 
     public override GameType Type => GameType.NumericalTicTacToe;
 
-    protected override void Apply(Placement p)
+    public override void Apply(Placement p)
     {
         Board board = Boards[p.BoardIndex];
         board.PlacePiece(p.Row, p.Column, new Piece(board.NextNumber));
     }
 
-    protected override MoveOutcome Evaluate(Placement p)
+    public override MoveOutcome Evaluate(Placement p)
     {
         Board board = Boards[p.BoardIndex];
 

@@ -25,8 +25,8 @@ public abstract class Game
     /// <summary>The boards the game is played on. Most games have just one.</summary>
     private readonly Board[] _boards;
 
-    /// <summary>Every move played so far, in order.</summary>
-    private readonly List<Placement> _history = new();
+    /// <summary>Every move played so far, most recent on top.</summary>
+    private readonly Stack<Placement> _history = new();
 
     /// <summary>
     /// The commands that have been played, most recent on top (the Command
@@ -63,7 +63,9 @@ public abstract class Game
     public abstract GameType Type { get; }
 
     public IReadOnlyList<Board> Boards => _boards;
-    public IReadOnlyList<Placement> History => _history;
+
+    /// <summary>Every move played so far, oldest first.</summary>
+    public IEnumerable<Placement> History => _history.Reverse();
     public int MoveCount => _history.Count;
 
     /// <summary>
@@ -88,7 +90,7 @@ public abstract class Game
         }
 
         Apply(placement);
-        _history.Add(placement);
+        _history.Push(placement);
         return Evaluate(placement);
     }
 
@@ -97,13 +99,11 @@ public abstract class Game
     /// </summary>
     internal Placement? Unplay()
     {
-        if (_history.Count == 0)
+        if (!_history.TryPop(out Placement last))
         {
             return null;
         }
 
-        Placement last = _history[^1];
-        _history.RemoveAt(_history.Count - 1);
         _boards[last.BoardIndex].UndoLastMove();
         return last;
     }
@@ -120,18 +120,19 @@ public abstract class Game
         return board.IsInBounds(p.Row, p.Column) && board.GetCell(p.Row, p.Column) is null;
     }
 
-    // Parts game types supply //
+    // Parts game types supply (declared on IGame) //
+    
 
     /// <summary>Any extra rule a game places on moves. Allows everything by default.</summary>
-    protected virtual bool IsLegal(Placement p) => true;
+    public virtual bool IsLegal(Placement p) => true;
 
     /// <summary>Puts the move's piece on the board.</summary>
-    protected abstract void Apply(Placement p);
+    public abstract void Apply(Placement p);
 
     /// <summary>
     /// Decides what the move just applied means for the player who made it.
     /// </summary>
-    protected abstract MoveOutcome Evaluate(Placement p);
+    public abstract MoveOutcome Evaluate(Placement p);
 
     // Additional helpers //
 
@@ -314,7 +315,7 @@ public abstract class Game
         _boards[0].Size,
         PlayerOne.Name,
         PlayerTwo.Name,
-        _history.ToArray());
+        History.ToArray()); // oldest first, so Load replays them in order
 
     /// <summary>The serialisable shape of a whole game.</summary>
     private sealed record GameState(

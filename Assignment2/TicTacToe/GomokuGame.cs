@@ -17,13 +17,13 @@ public sealed class GomokuGame : Game, IGame
 
     private int CurrentPiece => MoveCount % 2 == 0 ? 1 : 2;
 
-    protected override void Apply(Placement p)
+    public override void Apply(Placement p)
     {
         throw new NotImplementedException();
     }
 
     // Hint: Lines(board, InRow) gives every run of five cells to check. //
-    protected override MoveOutcome Evaluate(Placement p)
+    public override MoveOutcome Evaluate(Placement p)
     {
         throw new NotImplementedException();
     }
