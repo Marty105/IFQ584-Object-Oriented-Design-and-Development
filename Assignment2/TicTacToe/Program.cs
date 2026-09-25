@@ -11,10 +11,10 @@ using TicTacToe;
 
 // Start a brand new game, or pick up a saved one from disk.
 Game game = ChooseLoadGame() ? LoadGame() : NewGame();
-var board = game.Board;
+var board = game.Boards[0];
 
 Console.WriteLine();
-Console.WriteLine($"You chose {game.GameType}.");
+Console.WriteLine($"You chose {game.Type}.");
 Console.WriteLine($"{game.PlayerOne} vs {game.PlayerTwo}");
 Console.WriteLine($"Board size: {board.Size}x{board.Size}, using the numbers 1 to {board.HighestNumber}");
 Console.WriteLine(
@@ -32,7 +32,9 @@ while (true)
 
     // A human may undo, redo, save or ask for help before moving. Only when they
     // actually play (or the computer moves) do we check for a win or a draw.
-    if (!PlayTurn(current))
+    MoveOutcome? outcome = PlayTurn(current);
+
+    if (outcome is null)
     {
         // An undo or redo happened: redraw and let the loop re-pick the player.
         Console.WriteLine();
@@ -43,18 +45,21 @@ while (true)
     Console.WriteLine();
     Console.WriteLine(board);
 
-    // Whoever completes a line adding up to the target sum wins, no matter who
-    // played the other numbers in it — so the check is made straight after each
-    // move and the win goes to the player who just moved.
-    if (board.HasWinningLine())
+    // The game type decides what the move meant; the outcome is always from the
+    // point of view of the player who just moved.
+    if (outcome == MoveOutcome.CurrentPlayerWins)
     {
         Console.WriteLine($"{current} wins!");
         break;
     }
 
-    // The numbers run out exactly when the board fills, so a full board with no
-    // winning line is a draw.
-    if (board.IsFull())
+    if (outcome == MoveOutcome.CurrentPlayerLoses)
+    {
+        Console.WriteLine($"{current} loses!");
+        break;
+    }
+
+    if (outcome == MoveOutcome.Draw)
     {
         Console.WriteLine("It's a draw.");
         break;
@@ -135,7 +140,7 @@ Game NewGame()
         againstComputer ? PlayerKind.Computer : PlayerKind.Human,
         againstComputer ? settings.ComputerName : settings.PlayerTwoName);
 
-    return new Game(playerOne, playerTwo, boardSize, gameType);
+    return GameFactory.CreateGame(gameType, playerOne, playerTwo, boardSize);
 }
 
 // Load a saved game the user picks from the .json save files in the working
@@ -172,17 +177,11 @@ Game LoadGame()
         Console.WriteLine($"Please enter a number from 1 to {saves.Length}.");
     }
 
-    // The game needs a board size to be constructed; Load then replaces its
-    // players and board wholesale from the file, so these initial values are
-    // just placeholders. A minimum-size 3x3 board is enough to build one.
-    var loaded = new Game(
-        PlayerFactory.Create(PlayerKind.Human, "Player 1"),
-        PlayerFactory.Create(PlayerKind.Human, "Player 2"),
-        3, GameType.NumericalTicTacToe);
-
+    // The saved file records the game type, so Load builds the right kind of game.
+    Game loaded;
     try
     {
-        loaded.Load(File.ReadAllText(chosen));
+        loaded = Game.Load(File.ReadAllText(chosen));
     }
     catch (Exception ex)
     {
@@ -323,14 +322,14 @@ bool ChooseComputerOpponent()
     }
 }
 
-// Take one turn for a player. Returns true when an actual move was played (so
-// the loop should check for a win or draw), false when the human undid or redid
-// a move instead (so the loop should just redraw and carry on).
+// Take one turn for a player. Returns the move's outcome when an actual move was
+// played, or null when the human undid or redid a move instead (so the loop
+// should just redraw and carry on).
 //
 // Legality (the cell being on the board and empty, and the number being one the
 // player still holds) is enforced here so a bad move from either a human or the
 // computer re-prompts rather than crashing the game.
-bool PlayTurn(IPlayer player)
+MoveOutcome? PlayTurn(IPlayer player)
 {
     // Before a human's move, offer to undo, redo, save or ask for help. The
     // computer plays straight away, with nothing to prompt.
@@ -339,20 +338,18 @@ bool PlayTurn(IPlayer player)
         switch (AskTurnChoice())
         {
             case TurnChoice.Undo:
-                Move? undone = game.Undo();
-                if (undone is Move u)
+                if (game.Undo() is Placement u)
                 {
-                    Console.WriteLine($"Undid {u.Number} at ({u.Row}, {u.Column}).");
+                    Console.WriteLine($"Undid the move at ({u.Row}, {u.Column}).");
                 }
-                return false;
+                return null;
 
             case TurnChoice.Redo:
-                Move? redone = game.Redo();
-                if (redone is Move r)
+                if (game.Redo() is Placement r)
                 {
-                    Console.WriteLine($"Redid {r.Number} at ({r.Row}, {r.Column}).");
+                    Console.WriteLine($"Redid the move at ({r.Row}, {r.Column}).");
                 }
-                return false;
+                return null;
 
             case TurnChoice.SaveAndQuit:
                 game.Save();
@@ -382,18 +379,19 @@ bool PlayTurn(IPlayer player)
             continue;
         }
 
-        // The number played is the game's next number, so we only pass the cell.
+        // The game type decides what piece is played, so we only pass the cell.
         // PlayMove places it, hands over the turn, and clears the redo history.
         int number = move.Number;
+        MoveOutcome outcome = game.PlayMove(move.Row, move.Column);
 
-        if (!game.PlayMove(move.Row, move.Column))
+        if (outcome == MoveOutcome.Illegal)
         {
-            Console.WriteLine($"({move.Row}, {move.Column}) is already taken. Try again.");
+            Console.WriteLine($"({move.Row}, {move.Column}) can't be played. Try again.");
             continue;
         }
 
         Console.WriteLine($"{player} plays {number} at ({move.Row}, {move.Column}).");
-        return true;
+        return outcome;
     }
 }
 

@@ -34,13 +34,14 @@ public class Computer : PlayerBase, IPlayer
         // line adding up to the target sum.
         int number = board.NextNumber;
 
-        foreach ((int row, int column) in cells)
-        {
-            if (board.IsWinningMove(row, column, number))
-            {
-                return new Move(row, column, number);
-            }
-        }
+        // TODO: Board.IsWinningMove no longer exists - win check moves to GameVariant //
+        // foreach ((int row, int column) in cells)
+        // {
+        //     if (board.IsWinningMove(row, column, number))
+        //     {
+        //         return new Move(row, column, number);
+        //     }
+        // }
 
         // No winning cell, so play the number in a random empty cell.
         (int Row, int Column) cell = cells[Random.Shared.Next(cells.Count)];
