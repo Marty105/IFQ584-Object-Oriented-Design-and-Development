@@ -38,6 +38,7 @@ public interface IGame
 
     public GameType Type { get; }
 
+    // remove this, should be private
     public IReadOnlyList<Board> Boards { get; }
 
     public IPlayer CurrentPlayer { get; }
