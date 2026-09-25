@@ -4,4 +4,4 @@ namespace TicTacToe;
 public enum MoveOutcome { Illegal, Continue, CurrentPlayerWins, CurrentPlayerLoses, Draw }
 
 // Where a move is played: a cell on one of the game's boards. //
-public readonly record struct Placement(int Row, int Column, int BoardIndex = 0);
+public readonly record struct Placement(int Row, int Column, int selectedNumber, int BoardIndex = 0);

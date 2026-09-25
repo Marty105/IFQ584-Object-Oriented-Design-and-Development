@@ -24,7 +24,7 @@ public class Player : PlayerBase, IPlayer
     {
         while (true)
         {
-            Console.WriteLine($"{Name}'s turn. You play the number {board.NextNumber}.");
+            Console.WriteLine($"{Name}'s turn. You play the number ///{board.NextNumber}///.");
             Console.Write("Enter your move as \"row column\": ");
             string? line = Console.ReadLine();
 

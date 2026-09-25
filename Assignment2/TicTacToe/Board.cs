@@ -26,6 +26,7 @@ public class Board
     /// How many entries of <see cref="_moves"/> hold a real move so far.
     /// </summary>
     private int _moveCount;
+    public int MoveCount => _moveCount;
 
     /// <summary>
     /// The size of the board (the number of cells along one side).

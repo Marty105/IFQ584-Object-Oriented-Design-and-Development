@@ -13,6 +13,7 @@ public sealed class MoveCommand : ICommand
     private readonly Game _game;
     private readonly int _row;
     private readonly int _column;
+    private readonly int _selectedNumber;
     private readonly int _boardIndex; // Note - piece/number choice is made by the game type //
 
     public MoveOutcome Outcome { get; private set; } // makes outcome visible //
@@ -24,17 +25,19 @@ public sealed class MoveCommand : ICommand
     /// <param name="game">The game the move is played in.</param>
     /// <param name="row">The row to play in.</param>
     /// <param name="column">The column to play in.</param>
+    /// <param name="selectedNumber">The number to play.</param>
     /// <param name="boardIndex">Which of the game's boards to play on.</param>
-    public MoveCommand(Game game, int row, int column, int boardIndex = 0)
-    {
+    public MoveCommand(Game game, int row, int column, int selectedNumber, int boardIndex = 0)
+    { 
         _game = game;
         _row = row;
         _column = column;
+        _selectedNumber = selectedNumber;
         _boardIndex = boardIndex;
     }
 
     /// <summary>The move this command plays, once created.</summary>
-    public Placement Placement => new(_row, _column, _boardIndex);
+    public Placement Placement => new(_row, _column, _selectedNumber, _boardIndex);
 
     /// <inheritdoc />
     public bool Execute()
