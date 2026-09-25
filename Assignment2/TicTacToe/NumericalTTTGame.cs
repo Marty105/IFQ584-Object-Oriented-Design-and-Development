@@ -19,6 +19,11 @@ public sealed class NumericalTTTGame : Game, IGame
         throw new NotImplementedException();
     }
 
+    public MoveOutcome PlayMove(Placement p)
+    {
+        throw new NotImplementedException();
+    }
+
     public void Apply(Placement p)
     {
         Board board = Boards[p.BoardIndex];

@@ -24,7 +24,7 @@ public static class GameFactory
     /// <exception cref="ArgumentOutOfRangeException">
     /// If <paramref name="gameType"/> is not a known <see cref="GameType"/>.
     /// </exception>
-    public static Game CreateGame(GameType gameType, IPlayer playerOne, IPlayer playerTwo, int boardSize = 3)
+    public static IGame CreateGame(GameType gameType, IPlayer playerOne, IPlayer playerTwo, int boardSize = 3)
     {
         return gameType switch
         {

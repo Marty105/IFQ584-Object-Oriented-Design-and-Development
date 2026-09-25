@@ -10,7 +10,7 @@ using TicTacToe;
 // line (row, column or diagonal) of n numbers adding up to n(n^2 + 1) / 2 wins.
 
 // Start a brand new game, or pick up a saved one from disk.
-Game game = ChooseLoadGame() ? LoadGame() : NewGame();
+IGame game = ChooseLoadGame() ? LoadGame() : NewGame();
 var board = game.Boards[0];
 
 Console.WriteLine();
@@ -100,18 +100,18 @@ bool ChooseLoadGame()
 void ShowHelp()
 {
     Console.WriteLine();
-    Console.WriteLine("How to play Numerical Tic Tac Toe");
-    Console.WriteLine("---------------------------------");
-    Console.WriteLine("The board is an n x n grid played with the numbers 1 to n^2.");
-    Console.WriteLine("The players share the numbers and play them in order: the 1st");
-    Console.WriteLine("move plays 1, the 2nd plays 2, and so on. Player 1 moves first.");
-    Console.WriteLine();
-    Console.WriteLine("Players take turns placing the next number in an empty cell. The");
-    Console.WriteLine("first to complete a row, column or diagonal whose numbers add up");
-    Console.WriteLine("to n(n^2 + 1) / 2 (15 on a 3x3 board) wins — no matter who played");
-    Console.WriteLine("the other numbers in that line.");
-    Console.WriteLine();
-    Console.WriteLine("On your turn:");
+    // Console.WriteLine("How to play Numerical Tic Tac Toe");
+    // Console.WriteLine("---------------------------------");
+    // Console.WriteLine("The board is an n x n grid played with the numbers 1 to n^2.");
+    // Console.WriteLine("The players share the numbers and play them in order: the 1st");
+    // Console.WriteLine("move plays 1, the 2nd plays 2, and so on. Player 1 moves first.");
+    // Console.WriteLine();
+    // Console.WriteLine("Players take turns placing the next number in an empty cell. The");
+    // Console.WriteLine("first to complete a row, column or diagonal whose numbers add up");
+    // Console.WriteLine("to n(n^2 + 1) / 2 (15 on a 3x3 board) wins — no matter who played");
+    // Console.WriteLine("the other numbers in that line.");
+    // Console.WriteLine();
+    // Console.WriteLine("On your turn:");
     Console.WriteLine("  - Press Enter, then type your move as \"row column\",");
     Console.WriteLine("    e.g. \"1 2\". Rows and columns are numbered from 0. The");
     Console.WriteLine("    game's next number is played in that cell.");
@@ -124,7 +124,7 @@ void ShowHelp()
 // Set up a brand new game from the user's chosen board size and opponent.
 // Player 1 is always a human and moves first; player 2 is either another human
 // or the computer.
-Game NewGame()
+IGame NewGame()
 {
     GameType gameType = ChooseGameType();
     int boardSize = ChooseBoardSize();
@@ -145,7 +145,7 @@ Game NewGame()
 
 // Load a saved game the user picks from the .json save files in the working
 // directory. Falls back to a new game if there are none, or if loading fails.
-Game LoadGame()
+IGame LoadGame()
 {
     string[] saves = Directory.GetFiles(Directory.GetCurrentDirectory(), "*.json");
 
@@ -178,7 +178,7 @@ Game LoadGame()
     }
 
     // The saved file records the game type, so Load builds the right kind of game.
-    Game loaded;
+    IGame loaded;
     try
     {
         loaded = Game.Load(File.ReadAllText(chosen));
@@ -382,16 +382,18 @@ MoveOutcome? PlayTurn(IPlayer player)
         // The game type decides what piece is played, so we only pass the cell.
         // PlayMove places it, hands over the turn, and clears the redo history.
         int number = move.Number;
-        MoveOutcome outcome = game.PlayMove(move.Row, move.Column);
 
-        if (outcome == MoveOutcome.Illegal)
-        {
-            Console.WriteLine($"({move.Row}, {move.Column}) can't be played. Try again.");
-            continue;
-        }
+        // Placement placement = new Placement(move.row, move.column);
+        // MoveOutcome outcome = game.PlayMove(placement);
+
+        // if (outcome == MoveOutcome.Illegal)
+        // {
+        //     Console.WriteLine($"({move.Row}, {move.Column}) can't be played. Try again.");
+        //     continue;
+        // }
 
         Console.WriteLine($"{player} plays {number} at ({move.Row}, {move.Column}).");
-        return outcome;
+        // return un;
     }
 }
 

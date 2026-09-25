@@ -28,12 +28,7 @@ public sealed class NotaktoGame : Game, IGame
         throw new NotImplementedException();
     }
 
-    public void Apply(Placement p)
-    {
-        throw new NotImplementedException();
-    }
-
-    public MoveOutcome Evaluate(Placement p)
+    public MoveOutcome PlayMove(Placement p)
     {
         throw new NotImplementedException();
     }

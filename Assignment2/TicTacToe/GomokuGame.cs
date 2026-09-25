@@ -22,13 +22,7 @@ public sealed class GomokuGame : Game, IGame
         throw new NotImplementedException();
     }
 
-    public void Apply(Placement p)
-    {
-        throw new NotImplementedException();
-    }
-
-    // Hint: Lines(board, InRow) gives every run of five cells to check. //
-    public MoveOutcome Evaluate(Placement p)
+    public MoveOutcome PlayMove(Placement p)
     {
         throw new NotImplementedException();
     }

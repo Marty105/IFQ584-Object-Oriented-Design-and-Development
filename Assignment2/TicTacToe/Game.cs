@@ -20,6 +20,7 @@ public abstract class Game
     /// The two players in the game. Player one moves first.
     /// </summary>
     public IPlayer PlayerOne { get; }
+
     public IPlayer PlayerTwo { get; }
 
     /// <summary>
@@ -64,7 +65,6 @@ public abstract class Game
     /// <summary>Every move played so far, most recent on top.</summary>
     private readonly Stack<Placement> _history = new();
 
-
     /// <summary>Every move played so far, oldest first.</summary>
     public IEnumerable<Placement> History => _history.Reverse();
 
@@ -98,9 +98,10 @@ public abstract class Game
             return MoveOutcome.Illegal;
         }
 
-        rules.Apply(placement);
         _history.Push(placement);
-        return rules.Evaluate(placement);
+        var result = rules.PlayMove(placement);
+        
+        return result;
     }
 
     /// <summary>
@@ -167,19 +168,19 @@ public abstract class Game
     /// anything) if the move was not allowed. A fresh move retires any commands
     /// that were waiting to be redone.
     /// </summary>
-    public MoveOutcome PlayMove(int row, int column, int boardIndex = 0)
-    {
-        var command = new MoveCommand(this, row, column, boardIndex);
+    // public MoveOutcome PlayMove(int row, int column, int boardIndex = 0)
+    // {
+    //     var command = new MoveCommand(this, row, column, boardIndex);
 
-        if (!command.Execute())
-        {
-            return MoveOutcome.Illegal;
-        }
+    //     if (!command.Execute())
+    //     {
+    //         return MoveOutcome.Illegal;
+    //     }
 
-        _undo.Push(command);
-        _redo.Clear();
-        return command.Outcome;
-    }
+    //     _undo.Push(command);
+    //     _redo.Clear();
+    //     return command.Outcome;
+    // }
 
     /// <summary>True if there is a command that can be undone.</summary>
     public bool CanUndo => _undo.Count > 0;
@@ -236,7 +237,7 @@ public abstract class Game
     /// does not record whether a side was human or computer. A loaded game starts
     /// with an empty undo history.
     /// </remarks>
-    public static Game Load(string data)
+    public static IGame Load(string data)
     {
         GameState? state = JsonSerializer.Deserialize<GameState>(data, SerializerOptions);
 
@@ -245,7 +246,7 @@ public abstract class Game
             throw new ArgumentException("The game state is not valid JSON.", nameof(data));
         }
 
-        Game game = GameFactory.CreateGame(
+        IGame game = GameFactory.CreateGame(
             state.GameType,
             PlayerFactory.Create(PlayerKind.Human, state.PlayerOne),
             PlayerFactory.Create(PlayerKind.Human, state.PlayerTwo),
@@ -253,7 +254,7 @@ public abstract class Game
 
         foreach (Placement placement in state.Moves)
         {
-            if (game.Play(placement) == MoveOutcome.Illegal)
+            if (game.PlayMove(placement) == MoveOutcome.Illegal)
             {
                 throw new InvalidDataException($"The saved move {placement} is not legal.");
             }
